@@ -1,0 +1,56 @@
+## IOCs — Session 2 Malware Traffic Analysis
+## PCAP: 2021-09-10-traffic-analysis-exercise.pcap
+## Analyst: Nazneen | RGUKT Srikakulam
+## Date: May 2026
+
+=== MALICIOUS IPs ===
+194.62.42.206
+  - Role: C2 Command & Control server
+  - ASN: WorkTitans B.V. (AS209847) — Bulletproof hosting
+  - Flagged by: ESET (Malware) — 1/91 on VirusTotal
+  - Evidence: HTTP GET /bmdff/BhoHsCtZ/MLdmpfjaX/5uFG3Dz7yt/date1
+
+23.1.237.200 / 23.1.237.201 / 23.1.237.216 / 23.1.237.225
+  - Role: Malware delivery (masqueraded as Windows Update)
+  - ASN: Akamai International B.V. (AS20940) — Legitimate CDN, abused
+  - Path: /c/msdownload/update/others/2021/09/...
+  - Technique: T1036 Masquerading
+
+=== MALICIOUS DOMAINS ===
+angrypoutine.com
+  - Role: Malicious Active Directory domain
+  - Queries: 50+ DNS lookups detected
+  - Subdomains: ANGRYPOUTINE-DC, wpad, DESKTOP-MUYEYV7
+
+wpad.angrypoutine.com
+  - Role: WPAD proxy hijacking
+  - Technique: T1071.004
+
+simpsonsavingss.com
+  - Role: C2 Host header (fake domain)
+  - Used in HTTP request to 194.62.42.206
+
+=== MALICIOUS URLs ===
+GET /bmdff/BhoHsCtZ/MLdmpfjaX/5uFG3Dz7yt/date1?BNLv65=pAAS HTTP/1.1
+  - Destination: 194.62.42.206
+  - Pattern: Algorithmically generated random path
+
+GET /c/msdownload/update/others/2021/09/35095[...] HTTP/1.1
+GET /d/msdownload/update/others/2021/09/35096[...] HTTP/1.1
+GET /d/msdownload/update/software/defu/2021/09/am_delta_patch_1.34
+  - Destination: 23.1.237.200 (Akamai CDN)
+  - Pattern: Fake Windows Update path masquerading
+
+=== MALICIOUS FILES ===
+Filename: date6
+  - Size: 285 KB (284,816 bytes)
+  - Type: Windows PE Executable (MZ header detected)
+  - Role: Second-stage payload downloaded from C2
+  - Delivered via: HTTP 200 OK, Content-Type: application/octet-stream
+
+=== INFECTED HOST ===
+IP: 10.9.10.102
+Hostname: DESKTOP-KKITB6Q
+Domain: angrypoutine.com (Active Directory)
+OS: Windows 10 (WOW64, .NET CLR detected in User-Agent)
+MAC: 00:4f:49:b1:e8:c3
